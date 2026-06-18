@@ -8,6 +8,41 @@ st.set_page_config(
     layout="centered"
 )
 
+st.markdown("""
+<style>
+
+@media print {
+
+    header {
+        display: none !important;
+    }
+
+    footer {
+        display: none !important;
+    }
+
+    section[data-testid="stSidebar"] {
+        display: none !important;
+    }
+
+    .block-container {
+        max-width: 100% !important;
+        padding-top: 0 !important;
+    }
+
+    h1, h2, h3 {
+        page-break-after: avoid;
+    }
+
+    .element-container {
+        page-break-inside: avoid;
+    }
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
 st.title("Ejercicio 4.2.1 — Clasificación de EDP")
 
 st.subheader("Sistema analizado")
@@ -395,74 +430,74 @@ c\frac{n\pi}{L}
 $$
 """)
 
-st.subheader("e) Verificación gráfica de la convergencia con Python")
+# st.subheader("e) Verificación gráfica de la convergencia con Python")
 
-st.markdown(r"""
-Se aproxima la serie usando un número finito de armónicas:
+# st.markdown(r"""
+# Se aproxima la serie usando un número finito de armónicas:
 
-$$
-N=5,\quad 10,\quad 20
-$$
+# $$
+# N=5,\quad 10,\quad 20
+# $$
 
-Caso usado para visualizar:
+# Caso usado para visualizar:
 
-$$
-f(x)=x(L-x),
-\qquad
-g(x)=0
-$$
-""")
+# $$
+# f(x)=x(L-x),
+# \qquad
+# g(x)=0
+# $$
+# """)
 
-L = 1.0
-c = 1.0
-x = np.linspace(0, L, 500)
-t = st.slider("Tiempo $t$", 0.0, 2.0, 0.0, 0.01)
+# L = 1.0
+# c = 1.0
+# x = np.linspace(0, L, 500)
+# t = st.slider("Tiempo $t$", 0.0, 2.0, 0.0, 0.01)
 
-def f(x):
-    return x * (L - x)
+# def f(x):
+#     return x * (L - x)
 
-def g(x):
-    return 0 * x
+# def g(x):
+#     return 0 * x
 
-def compute_A(n):
-    xi = np.linspace(0, L, 2000)
-    integrand = f(xi) * np.sin(n * np.pi * xi / L)
-    return (2 / L) * np.trapz(integrand, xi)
+# def compute_A(n):
+#     xi = np.linspace(0, L, 2000)
+#     integrand = f(xi) * np.sin(n * np.pi * xi / L)
+#     return (2 / L) * np.trapz(integrand, xi)
 
-def compute_B(n):
-    xi = np.linspace(0, L, 2000)
-    omega_n = c * n * np.pi / L
-    integrand = g(xi) * np.sin(n * np.pi * xi / L)
-    return (2 / (L * omega_n)) * np.trapz(integrand, xi)
+# def compute_B(n):
+#     xi = np.linspace(0, L, 2000)
+#     omega_n = c * n * np.pi / L
+#     integrand = g(xi) * np.sin(n * np.pi * xi / L)
+#     return (2 / (L * omega_n)) * np.trapz(integrand, xi)
 
-def u_series(x, t, N):
-    total = np.zeros_like(x)
+# def u_series(x, t, N):
+#     total = np.zeros_like(x)
 
-    for n in range(1, N + 1):
-        omega_n = c * n * np.pi / L
-        A_n = compute_A(n)
-        B_n = compute_B(n)
+#     for n in range(1, N + 1):
+#         omega_n = c * n * np.pi / L
+#         A_n = compute_A(n)
+#         B_n = compute_B(n)
 
-        total += (
-            A_n * np.cos(omega_n * t)
-            + B_n * np.sin(omega_n * t)
-        ) * np.sin(n * np.pi * x / L)
+#         total += (
+#             A_n * np.cos(omega_n * t)
+#             + B_n * np.sin(omega_n * t)
+#         ) * np.sin(n * np.pi * x / L)
 
-    return total
+#     return total
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 
-ax.plot(x, f(x), linestyle="--", label="$f(x)$")
+# ax.plot(x, f(x), linestyle="--", label="$f(x)$")
 
-for N in [5, 10, 20]:
-    ax.plot(x, u_series(x, t, N), label=f"N = {N}")
+# for N in [5, 10, 20]:
+#     ax.plot(x, u_series(x, t, N), label=f"N = {N}")
 
-ax.set_xlabel("x")
-ax.set_ylabel("u(x,t)")
-ax.set_title("Convergencia de la serie de Fourier")
-ax.legend()
-ax.grid(True)
+# ax.set_xlabel("x")
+# ax.set_ylabel("u(x,t)")
+# ax.set_title("Convergencia de la serie de Fourier")
+# ax.legend()
+# ax.grid(True)
 
-st.pyplot(fig)
+# st.pyplot(fig)
 
-st.success("La aproximación mejora al aumentar el número de armónicas.")
+# st.success("La aproximación mejora al aumentar el número de armónicas.")
