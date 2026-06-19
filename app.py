@@ -1,6 +1,6 @@
 import streamlit as st
-# import numpy as np
-# import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 st.set_page_config(
@@ -10,35 +10,29 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-
 @media print {
-
-    header {
-        display: none !important;
-    }
-
-    footer {
-        display: none !important;
-    }
-
-    section[data-testid="stSidebar"] {
+    header, footer, section[data-testid="stSidebar"] {
         display: none !important;
     }
 
     .block-container {
         max-width: 100% !important;
         padding-top: 0 !important;
+        padding-left: 12mm !important;
+        padding-right: 28mm !important;
+        transform: translateX(-8mm);
+        overflow: visible !important;
     }
 
-    h1, h2, h3 {
-        page-break-after: avoid;
+    .element-container, .stMarkdown {
+        overflow: visible !important;
     }
 
-    .element-container {
-        page-break-inside: avoid;
+    @page {
+        size: A4;
+        margin: 15mm;
     }
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -430,74 +424,423 @@ c\frac{n\pi}{L}
 $$
 """)
 
-# st.subheader("e) Verificación gráfica de la convergencia con Python")
+st.markdown(r"""---""")
+st.title("Aplicación — Viga idealizada con vibración axial")
 
-# st.markdown(r"""
-# Se aproxima la serie usando un número finito de armónicas:
+st.markdown(r"""
+Para ver el caso aplicativo, se idealiza un elemento estructural del edificio como una **viga trabajando únicamente en vibración axial**.
 
-# $$
-# N=5,\quad 10,\quad 20
-# $$
+Una viga real puede vibrar de varias formas:
 
-# Caso usado para visualizar:
+- vibración axial,
+- vibración por flexión,
+- torsión,
+- modos combinados.
 
-# $$
-# f(x)=x(L-x),
-# \qquad
-# g(x)=0
-# $$
-# """)
+En este ejercicio no se analiza la flexión de la viga.  
+Se considera solamente la propagación de ondas longitudinales a lo largo de su eje.
 
-# L = 1.0
-# c = 1.0
-# x = np.linspace(0, L, 500)
-# t = st.slider("Tiempo $t$", 0.0, 2.0, 0.0, 0.01)
+Por esta razón, la variable de campo se toma como:
 
-# def f(x):
-#     return x * (L - x)
+$$
+u(x,t)
+$$
 
-# def g(x):
-#     return 0 * x
+donde:
 
-# def compute_A(n):
-#     xi = np.linspace(0, L, 2000)
-#     integrand = f(xi) * np.sin(n * np.pi * xi / L)
-#     return (2 / L) * np.trapz(integrand, xi)
+- $u(x,t)$ es el desplazamiento axial,
+- $x$ es la coordenada a lo largo del eje de la viga,
+- $t$ es el tiempo.
 
-# def compute_B(n):
-#     xi = np.linspace(0, L, 2000)
-#     omega_n = c * n * np.pi / L
-#     integrand = g(xi) * np.sin(n * np.pi * xi / L)
-#     return (2 / (L * omega_n)) * np.trapz(integrand, xi)
+Bajo esta hipótesis, la viga se comporta como una barra elástica unidimensional.
+""")
 
-# def u_series(x, t, N):
-#     total = np.zeros_like(x)
+st.subheader("Modelo físico adoptado")
 
-#     for n in range(1, N + 1):
-#         omega_n = c * n * np.pi / L
-#         A_n = compute_A(n)
-#         B_n = compute_B(n)
+st.markdown(r"""
+Se considera una viga de longitud:
 
-#         total += (
-#             A_n * np.cos(omega_n * t)
-#             + B_n * np.sin(omega_n * t)
-#         ) * np.sin(n * np.pi * x / L)
+$$
+L = 4.06 \ \text{m}
+$$
 
-#     return total
+idealizada como una barra axial elástica.
 
-# fig, ax = plt.subplots()
+El fenómeno considerado es el alargamiento y acortamiento longitudinal del elemento,
+no su deflexión transversal.
 
-# ax.plot(x, f(x), linestyle="--", label="$f(x)$")
+Por tanto, la ecuación gobernante es:
 
-# for N in [5, 10, 20]:
-#     ax.plot(x, u_series(x, t, N), label=f"N = {N}")
+$$
+\frac{\partial^2 u}{\partial t^2}
+=
+c^2
+\frac{\partial^2 u}{\partial x^2}
+$$
 
-# ax.set_xlabel("x")
-# ax.set_ylabel("u(x,t)")
-# ax.set_title("Convergencia de la serie de Fourier")
-# ax.legend()
-# ax.grid(True)
+donde:
 
-# st.pyplot(fig)
+$$
+c=
+\sqrt{\frac{E}{\rho}}
+$$
 
-# st.success("La aproximación mejora al aumentar el número de armónicas.")
+es la velocidad de propagación de la onda axial en el material.
+""")
+
+st.subheader("Condiciones de frontera")
+
+st.markdown(r"""
+Para mantener consistencia con el desarrollo de Fourier seno, se consideran extremos restringidos:
+
+$$
+u(0,t)=0
+$$
+
+$$
+u(L,t)=0
+$$
+
+Estas condiciones indican que el desplazamiento axial es nulo en ambos extremos. Esto produce funciones propias de la forma:
+
+$$
+X_n(x)
+=
+\sin
+\left(
+\frac{n\pi x}{L}
+\right)
+$$
+
+Por eso la solución se expresa mediante una serie de Fourier seno.
+""")
+
+st.subheader("Frecuencias naturales axiales")
+
+st.markdown(r"""
+Las frecuencias angulares naturales son:
+
+$$
+\omega_n
+=
+c
+\frac{n\pi}{L}
+$$
+
+Sustituyendo la longitud:
+
+$$
+L = 4.06 \ \text{m}
+$$
+
+se obtiene:
+
+$$
+\omega_n
+=
+c
+\frac{n\pi}{4.06}
+$$
+
+Esto significa que cada modo axial de vibración posee una frecuencia natural propia.
+
+El modo fundamental corresponde a:
+
+$$
+n=1
+$$
+
+por tanto:
+
+$$
+\omega_1
+=
+c
+\frac{\pi}{4.06}
+$$
+""")
+
+st.subheader("Interpretación aplicada")
+
+st.markdown(r"""
+La solución:
+
+$$
+u(x,t)
+=
+\sum_{n=1}^{\infty}
+\left[
+A_n\cos(\omega_n t)
++
+B_n\sin(\omega_n t)
+\right]
+\sin
+\left(
+\frac{n\pi x}{L}
+\right)
+$$
+
+representa la vibración axial de la viga como una superposición de modos.
+
+Cada término de la serie tiene dos partes:
+
+- una forma espacial,
+- una variación temporal.
+
+La forma espacial indica cómo se deforma axialmente la viga a lo largo de su longitud.
+
+La parte temporal indica cómo oscila esa forma con el tiempo.
+""")
+
+st.subheader("Primeros tres modos axiales de vibración")
+
+st.markdown(r"""
+Para visualizar la aplicación, se calculan los tres primeros modos axiales de una viga idealizada
+como una **barra elástica en vibración longitudinal**.
+
+En este modelo no se analiza flexión.  
+Solo se analiza el desplazamiento axial:
+
+$$
+u(x,t)
+$$
+
+Se adopta una longitud:
+
+$$
+L = 4.06 \ \text{m}
+$$
+
+y un concreto con resistencia a compresión:
+
+$$
+f'_c = 210 \ \text{kg/cm}^2
+$$
+
+Para estimar el módulo de elasticidad del concreto se usa la aproximación:
+
+$$
+E =
+15000 \sqrt{f'_c}
+$$
+
+donde:
+
+- $E$ se obtiene en $\text{kg/cm}^2$,
+- $f'_c$ se introduce en $\text{kg/cm}^2$.
+""")
+
+L = 4.06
+fc = 210          # kg/cm2
+rho = 2400       # kg/m3
+
+E_kg_cm2 = 15000 * np.sqrt(fc)
+E_MPa = E_kg_cm2 * 0.0980665
+E = E_MPa * 1e6
+
+st.markdown(rf"""
+Sustituyendo:
+
+$$
+E =
+15000\sqrt{{210}}
+=
+{E_kg_cm2:,.2f}
+\ \text{{kg/cm}}^2
+$$
+
+Convirtiendo a unidades del Sistema Internacional:
+
+$$
+E =
+{E_MPa:,.2f}
+\ \text{{MPa}}
+=
+{E/1e9:.2f}
+\ \text{{GPa}}
+$$
+
+Se adopta además una densidad típica del concreto armado definida en el proyecto de:
+
+$$
+\rho = 2400 \ \text{{kg/m}}^3
+$$
+""")
+
+st.subheader("Velocidad de propagación axial")
+
+st.markdown(r"""
+Para una barra elástica en vibración longitudinal, la velocidad de propagación de la onda axial es:
+
+$$
+c =
+\sqrt{
+\frac{E}{\rho}
+}
+$$
+
+donde:
+
+- $c$ es la velocidad de propagación axial,
+- $E$ es el módulo de elasticidad del material,
+- $\rho$ es la densidad del material.
+""")
+
+c = np.sqrt(E / rho)
+
+st.markdown(rf"""
+Sustituyendo:
+
+$$
+c =
+\sqrt{{\frac{{{E:.2e}}}{{{rho}}}}}
+=
+{c:.2f}
+\ \text{{m/s}}
+$$
+""")
+
+st.subheader("Cálculo de los valores propios")
+
+st.markdown(r"""
+Para extremos restringidos:
+
+$$
+u(0,t)=0
+$$
+
+$$
+u(L,t)=0
+$$
+
+las funciones propias son:
+
+$$
+X_n(x)
+=
+\sin
+\left(
+\frac{n\pi x}{L}
+\right)
+$$
+
+y los valores propios son:
+
+$$
+\lambda_n
+=
+\left(
+\frac{n\pi}{L}
+\right)^2
+$$
+
+El valor propio $\lambda_n$ mide la frecuencia espacial del modo.  
+Mientras mayor es $\lambda_n$, más ondas internas tiene el modo dentro de la longitud $L$.
+""")
+
+st.subheader("Frecuencias naturales")
+
+st.markdown(r"""
+La frecuencia angular natural de cada modo se calcula como:
+
+$$
+\omega_n
+=
+c
+\frac{n\pi}{L}
+$$
+
+y la frecuencia en Hertz se obtiene mediante:
+
+$$
+f_n
+=
+\frac{\omega_n}{2\pi}
+$$
+""")
+
+modes = []
+
+for n in range(1, 4):
+    lambda_n = (n * np.pi / L) ** 2
+    omega_n = c * n * np.pi / L
+    f_n = omega_n / (2 * np.pi)
+
+    modes.append({
+        "Modo n": n,
+        "lambda_n [1/m²]": round(lambda_n, 4),
+        "omega_n [rad/s]": round(omega_n, 2),
+        "f_n [Hz]": round(f_n, 2)
+    })
+
+st.table(modes)
+
+st.markdown(r"""
+Interpretación:
+
+- $n=1$ corresponde al modo fundamental.
+- $n=2$ corresponde al segundo modo axial.
+- $n=3$ corresponde al tercer modo axial.
+- En este modelo axial idealizado, las frecuencias aumentan proporcionalmente con $n$.
+""")
+
+st.subheader("Formas modales")
+
+x = np.linspace(0, L, 400)
+
+fig, ax = plt.subplots()
+
+for n in range(1, 4):
+    Xn = np.sin(n * np.pi * x / L)
+    ax.plot(x, Xn, label=f"Modo {n}")
+
+ax.set_xlabel("x [m]")
+ax.set_ylabel("X_n(x)")
+ax.set_title("Primeros tres modos axiales")
+ax.legend()
+ax.grid(True)
+
+st.pyplot(fig)
+
+st.markdown(r"""
+Las formas modales calculadas son:
+
+$$
+X_1(x)
+=
+\sin
+\left(
+\frac{\pi x}{L}
+\right)
+$$
+
+$$
+X_2(x)
+=
+\sin
+\left(
+\frac{2\pi x}{L}
+\right)
+$$
+
+$$
+X_3(x)
+=
+\sin
+\left(
+\frac{3\pi x}{L}
+\right)
+$$
+
+Estas funciones cumplen las condiciones de frontera:
+
+$$
+X_n(0)=0
+$$
+
+$$
+X_n(L)=0
+$$
+
+por eso son compatibles con una barra idealizada con extremos restringidos.
+""")
